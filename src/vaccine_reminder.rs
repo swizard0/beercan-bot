@@ -25,12 +25,14 @@ use telegram_bot::{
     CanReplySendMessage,
 };
 
+pub const DEFAULT_USER_ID_STR: &'static str = "337229462";
+
 #[derive(Clone, Debug, StructOpt)]
 #[structopt(setting = AppSettings::DeriveDisplayOrder)]
 #[structopt(setting = AppSettings::AllowLeadingHyphen)]
 pub struct CliArgs {
     /// user id to remind about vaccination
-    #[structopt(short = "u", long = "vaccine-reminder-user-id")]
+    #[structopt(short = "u", long = "vaccine-reminder-user-id", default_value = DEFAULT_USER_ID_STR)]
     user_id: Integer,
 
     /// chat id to use
@@ -202,6 +204,8 @@ fn phrase_terminate<R>(rng: &mut R) -> Option<&'static str> where R: Rng {
         ", в конце концов",
         ", наконец-то",
         ", в конечном итоге",
+        ", и, если нет, то по какой причине",
+        ", и, если нет, то когда планируешь",
     ];
 
     random_variant_opt(rng, variants)
