@@ -13,9 +13,6 @@ use structopt::{
 
 use telegram_bot::{
     Api,
-    UpdateKind,
-    MessageKind,
-    CanReplySendMessage,
 };
 
 mod vaccine_reminder;
@@ -26,12 +23,16 @@ struct CliArgs {
     /// facebook accounts database
     #[structopt(short = "t", long = "telegram-bot-token")]
     telegram_bot_token: String,
+
+    #[structopt(flatten)]
+    vaccine_reminder: vaccine_reminder::CliArgs,
 }
 
 #[derive(Debug)]
 enum Error {
     TelegramApiStream(telegram_bot::Error),
-    TelegramApiSend(telegram_bot::Error),
+    VaccineReminderCreate(vaccine_reminder::Error),
+    VaccineReminderProcess(vaccine_reminder::Error),
 }
 
 #[tokio::main]
@@ -42,33 +43,16 @@ async fn main() -> Result<(), Error> {
 
     let api = Api::new(cli_args.telegram_bot_token);
 
+    let vaccine_reminder = vaccine_reminder::VaccineReminder::new(&cli_args.vaccine_reminder)
+        .map_err(Error::VaccineReminderCreate)?;
+
     let mut stream = api.stream();
     while let Some(update) = stream.next().await {
-        // If the received update contains a new message...
         let update = update
             .map_err(Error::TelegramApiStream)?;
 
-        if let UpdateKind::Message(message) = update.kind {
-            if let MessageKind::Text { ref data, .. } = message.kind {
-                // Print received text message to stdout.
-                println!("<{}>: {}", &message.from.first_name, data);
-
-                println!("{:?}", message);
-
-                // Answer message with "Hi".
-                let _message_or_channel_post =
-                    api.send(message.text_reply(format!(
-                        "Hi, {}! You just wrote '{}'",
-                        &message.from.first_name, data
-                    )))
-                    .await
-                    .map_err(Error::TelegramApiSend)?;
-            } else {
-                println!("other message: {:?}", message);
-            }
-        } else {
-            println!("other update kind: {:?}", update);
-        }
+        vaccine_reminder.process(&update, &api).await
+            .map_err(Error::VaccineReminderProcess)?;
     }
 
     Ok(())
