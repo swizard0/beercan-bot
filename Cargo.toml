@@ -1,6 +1,6 @@
 [package]
 name = "beercan-bot"
-version = "0.1.4"
+version = "0.1.5"
 license = "MIT"
 description = "Beercan community telegram bot."
 edition = "2018"

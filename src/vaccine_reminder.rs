@@ -26,6 +26,7 @@ use telegram_bot::{
 };
 
 pub const DEFAULT_USER_ID_STR: &'static str = "337229462";
+pub const DEFAULT_GROUP_ID_STR: &'static str = "-222927743";
 
 #[derive(Clone, Debug, StructOpt)]
 #[structopt(setting = AppSettings::DeriveDisplayOrder)]
@@ -36,7 +37,7 @@ pub struct CliArgs {
     user_id: Integer,
 
     /// chat id to use
-    #[structopt(short = "g", long = "vaccine-reminder-group-id")]
+    #[structopt(short = "g", long = "vaccine-reminder-group-id", default_value = DEFAULT_GROUP_ID_STR)]
     group_id: Integer,
 }
 
@@ -68,18 +69,15 @@ impl VaccineReminder {
                         kind: MessageKind::Text { data, .. },
                         ..
                     } if user_id == &self.user_id && chat_id == &self.group_id && is_question(data) => {
-                        println!("<{}>: {}", &message.from.first_name, data);
-                        println!("{:?}", update);
-
                         let reply_phrase = build_phrase();
                         let _message_or_channel_post = api.send(message.text_reply(reply_phrase)).await
                             .map_err(Error::TelegramApiSend)?;
                     },
                     other_message =>
-                        println!("other message kind: {:?}", other_message),
+                        log::debug!("other message kind: {:?}", other_message),
                 },
             other_update =>
-                println!("other update kind: {:?}", other_update),
+                log::debug!("other update kind: {:?}", other_update),
         }
         Ok(())
     }
