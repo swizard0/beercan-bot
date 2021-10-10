@@ -52,7 +52,7 @@ use telegram_bot::{
 
 pub const DEFAULT_USER_ID_STR: &'static str = "337229462"; // Parviz Sadesi
 pub const DEFAULT_GROUP_ID_STR: &'static str = "-222927743"; // Beercan
-pub const DEFAULT_FORWARD_GROUP_ID_STR: &'static str = "-756453207";
+pub const DEFAULT_FORWARD_GROUP_ID_STR: &'static str = "-756453207"; // beercan delete monitor
 pub const DEFAULT_WINDOW_SIZE_STR: &'static str = "32";
 pub const DEFAULT_CHECK_TIMEOUT_S_STR: &'static str = "60";
 
