@@ -43,6 +43,7 @@ use telegram_bot::{
     Message,
     UpdateKind,
     MessageChat,
+    CanDeleteMessage,
     CanForwardMessage,
 };
 
@@ -152,6 +153,7 @@ async fn run_monitor(
     let mut fused_monitor_rx = monitor_rx.fuse();
     let mut current_timeout = None;
     let mut window = VecDeque::with_capacity(window_size);
+    let mut window_backup = Vec::with_capacity(window_size);
 
     loop {
         if current_timeout.is_none() {
@@ -191,12 +193,24 @@ async fn run_monitor(
 
             Event::MonitorTimeout => {
                 current_timeout = None;
-
-                for message in &window {
-                    if let Err(error) = api.send(message.forward(&forward_group_id)).await {
-                        log::error!("failed to forward: {:?}", error);
+                for message in window.drain(..) {
+                    let mut forward_message = message.forward(&forward_group_id);
+                    forward_message.disable_notification();
+                    match api.send(forward_message).await {
+                        Ok(message_or_channel_post) => {
+                            api.send(message_or_channel_post.delete()).await.ok();
+                            window_backup.push(message);
+                        },
+                        Err(error) if format!("{}", error).contains("message to forward not found") => {
+                            log::debug!("detected deleted message: {:?}", message);
+                        },
+                        Err(error) => {
+                            log::error!("failed to forward: {:?}", error);
+                            break;
+                        },
                     }
                 }
+                window.extend(window_backup.drain(..));
             },
 
         }
