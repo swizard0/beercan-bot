@@ -25,8 +25,8 @@ use telegram_bot::{
     CanReplySendMessage,
 };
 
-pub const DEFAULT_USER_ID_STR: &'static str = "337229462";
-pub const DEFAULT_GROUP_ID_STR: &'static str = "-222927743";
+pub const DEFAULT_USER_ID_STR: &'static str = "337229462"; // Parviz Sadesi
+pub const DEFAULT_GROUP_ID_STR: &'static str = "-222927743"; // Beercan
 
 #[derive(Clone, Debug, StructOpt)]
 #[structopt(setting = AppSettings::DeriveDisplayOrder)]
@@ -59,7 +59,7 @@ impl VaccineReminder {
         })
     }
 
-    pub async fn process(&self, update: &Update, api: &Api) -> Result<(), Error> {
+    pub async fn process(&mut self, update: &Update, api: &Api) -> Result<(), Error> {
         match &update.kind {
             UpdateKind::Message(message) =>
                 match message {

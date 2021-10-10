@@ -16,6 +16,7 @@ use telegram_bot::{
 };
 
 mod vaccine_reminder;
+mod delete_recover;
 
 #[derive(Clone, Debug, StructOpt)]
 #[structopt(setting = AppSettings::DeriveDisplayOrder)]
@@ -26,6 +27,9 @@ struct CliArgs {
 
     #[structopt(flatten)]
     vaccine_reminder: vaccine_reminder::CliArgs,
+
+    #[structopt(flatten)]
+    delete_recover: delete_recover::CliArgs,
 }
 
 #[derive(Debug)]
@@ -33,6 +37,8 @@ enum Error {
     TelegramApiStream(telegram_bot::Error),
     VaccineReminderCreate(vaccine_reminder::Error),
     VaccineReminderProcess(vaccine_reminder::Error),
+    DeleteRecoverCreate(delete_recover::Error),
+    DeleteRecoverProcess(delete_recover::Error),
 }
 
 #[tokio::main]
@@ -43,8 +49,10 @@ async fn main() -> Result<(), Error> {
 
     let api = Api::new(cli_args.telegram_bot_token);
 
-    let vaccine_reminder = vaccine_reminder::VaccineReminder::new(&cli_args.vaccine_reminder)
+    let mut vaccine_reminder = vaccine_reminder::VaccineReminder::new(&cli_args.vaccine_reminder)
         .map_err(Error::VaccineReminderCreate)?;
+    let mut delete_recover = delete_recover::DeleteRecover::new(&cli_args.delete_recover)
+        .map_err(Error::DeleteRecoverCreate)?;
 
     let mut stream = api.stream();
     while let Some(update) = stream.next().await {
@@ -53,6 +61,8 @@ async fn main() -> Result<(), Error> {
 
         vaccine_reminder.process(&update, &api).await
             .map_err(Error::VaccineReminderProcess)?;
+        delete_recover.process(&update, &api).await
+            .map_err(Error::DeleteRecoverProcess)?;
     }
 
     Ok(())
