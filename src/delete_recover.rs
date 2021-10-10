@@ -41,8 +41,11 @@ use telegram_bot::{
     Group,
     Update,
     Message,
+    ParseMode,
     UpdateKind,
     MessageChat,
+    SendMessage,
+    MessageKind,
     CanDeleteMessage,
     CanForwardMessage,
 };
@@ -120,6 +123,7 @@ impl DeleteRecover {
                             tokio::spawn(run_monitor(
                                 api.clone(),
                                 monitor_rx,
+                                self.group_id,
                                 self.forward_group_id,
                                 self.window_size,
                                 self.check_timeout_s,
@@ -145,6 +149,7 @@ impl DeleteRecover {
 async fn run_monitor(
     api: Api,
     monitor_rx: mpsc::Receiver<Message>,
+    group_id: GroupId,
     forward_group_id: GroupId,
     window_size: usize,
     check_timeout_s: u64,
@@ -203,6 +208,24 @@ async fn run_monitor(
                         },
                         Err(error) if format!("{}", error).contains("message to forward not found") => {
                             log::debug!("detected deleted message: {:?}", message);
+                            let who = if let Some(username) = &message.from.username {
+                                format!("@{}", username)
+                            } else {
+                                message.from.first_name.to_string()
+                            };
+                            let source = match &message.kind {
+                                MessageKind::Text { data, .. } |
+                                MessageKind::Document { caption: Some(data), .. } |
+                                MessageKind::Photo { caption: Some(data), .. } |
+                                MessageKind::Video { caption: Some(data), .. } =>
+                                    format!("\n```\n{}\n```\n", data),
+                                _ =>
+                                    String::new(),
+                            };
+                            let mut monitor_notify_message =
+                                SendMessage::new(&group_id, format!("{} , вот злодей, удалил сообщение!{}", who, source));
+                            monitor_notify_message.parse_mode(ParseMode::Markdown);
+                            api.send(monitor_notify_message).await.ok();
                         },
                         Err(error) => {
                             log::error!("failed to forward: {:?}", error);
