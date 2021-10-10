@@ -63,7 +63,7 @@ impl VaccineReminder {
                         chat: MessageChat::Group(Group { id: chat_id, .. }),
                         kind: MessageKind::Text { data, .. },
                         ..
-                    } if user_id == &self.user_id && chat_id == &self.group_id => {
+                    } if user_id == &self.user_id && chat_id == &self.group_id && is_question(data) => {
 
                         // if let UpdateKind::Message(message) = &update.kind {
                         //     if let MessageKind::Text { data, .. } = &message.kind {
@@ -82,4 +82,17 @@ impl VaccineReminder {
         }
         Ok(())
     }
+}
+
+fn is_question(message: &str) -> bool {
+    for ch in message.chars().rev() {
+        if ch == '?' {
+            return true;
+        }
+        if ch.is_alphanumeric() {
+            break;
+        }
+    }
+
+    false
 }
