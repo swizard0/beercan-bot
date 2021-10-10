@@ -170,6 +170,7 @@ fn phrase_action<R>(rng: &mut R) -> &'static str where R: Rng {
         "выполнил",
         "совершил",
         "произвёл",
+        "сотворил",
     ];
 
     random_variant(rng, variants)
