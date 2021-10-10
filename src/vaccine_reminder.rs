@@ -33,12 +33,12 @@ pub const DEFAULT_GROUP_ID_STR: &'static str = "-222927743"; // Beercan
 #[structopt(setting = AppSettings::AllowLeadingHyphen)]
 pub struct CliArgs {
     /// user id to remind about vaccination
-    #[structopt(short = "u", long = "vaccine-reminder-user-id", default_value = DEFAULT_USER_ID_STR)]
-    user_id: Integer,
+    #[structopt(long = "vaccine-reminder-user-id", default_value = DEFAULT_USER_ID_STR)]
+    vaccine_reminder_user_id: Integer,
 
-    /// chat id to use
-    #[structopt(short = "g", long = "vaccine-reminder-group-id", default_value = DEFAULT_GROUP_ID_STR)]
-    group_id: Integer,
+    /// group id to use
+    #[structopt(long = "vaccine-reminder-group-id", default_value = DEFAULT_GROUP_ID_STR)]
+    vaccine_reminder_group_id: Integer,
 }
 
 #[derive(Debug)]
@@ -54,8 +54,8 @@ pub struct VaccineReminder {
 impl VaccineReminder {
     pub fn new(cli_args: &CliArgs) -> Result<VaccineReminder, Error> {
         Ok(VaccineReminder {
-            user_id: cli_args.user_id.into(),
-            group_id: cli_args.group_id.into(),
+            user_id: cli_args.vaccine_reminder_user_id.into(),
+            group_id: cli_args.vaccine_reminder_group_id.into(),
         })
     }
 
