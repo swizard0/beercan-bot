@@ -93,7 +93,15 @@ fn is_question(message: &str) -> bool {
         }
     }
 
-    false
+    lazy_static::lazy_static! {
+        static ref QUESTION_REPLACER_REGEX: regex::Regex =
+            regex::RegexBuilder::new(r#"(вопрос|FFFD)"#)
+            .case_insensitive(true)
+            .build()
+            .unwrap();
+    }
+
+    QUESTION_REPLACER_REGEX.is_match(message)
 }
 
 fn build_phrase() -> String {
@@ -224,4 +232,37 @@ fn random_variant<R>(rng: &mut R, variants: &[&'static str]) -> &'static str whe
     let variants_count = variants.len();
     let index = rng.gen_range(0 .. variants_count);
     variants[index]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        is_question,
+    };
+
+    #[test]
+    fn question_00() {
+        assert!(is_question("Вера это младшая ?"));
+    }
+
+    #[test]
+    fn question_01() {
+        assert!(is_question("Как можно делать по две прививки за раз (U+FFFD)\nОни же делаются с перерывом в две недели."));
+    }
+
+    #[test]
+    fn question_02() {
+        assert!(is_question("А вы где-нибудь регистрировались, чтобы получать на телефон или на почту сообщения о штрафах ГИБДД (знак вопроса)"));
+    }
+
+    #[test]
+    fn question_03() {
+        assert!(is_question("Ф5 ,  это поликлиника 95 на  Вернадского , 9 \n0xFFFD"));
+    }
+
+    #[test]
+    fn not_question_00() {
+        assert!(!is_question("Ф5, ответь, будь ласка."));
+    }
+
 }
