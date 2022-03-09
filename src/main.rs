@@ -4,11 +4,9 @@ use futures::{
     StreamExt,
 };
 
-use structopt::{
-    clap::{
-        AppSettings,
-    },
-    StructOpt,
+use clap::{
+    Parser,
+    AppSettings,
 };
 
 use telegram_bot::{
@@ -18,17 +16,17 @@ use telegram_bot::{
 mod vaccine_reminder;
 mod delete_recover;
 
-#[derive(Clone, Debug, StructOpt)]
-#[structopt(setting = AppSettings::DeriveDisplayOrder)]
+#[derive(Clone, Debug, Parser)]
+#[clap(setting = AppSettings::DeriveDisplayOrder)]
 struct CliArgs {
     /// facebook accounts database
-    #[structopt(short = "t", long = "telegram-bot-token")]
+    #[clap(short = 't', long = "telegram-bot-token")]
     telegram_bot_token: String,
 
-    #[structopt(flatten)]
+    #[clap(flatten)]
     vaccine_reminder: vaccine_reminder::CliArgs,
 
-    #[structopt(flatten)]
+    #[clap(flatten)]
     delete_recover: delete_recover::CliArgs,
 }
 
@@ -44,7 +42,7 @@ enum Error {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     pretty_env_logger::init_timed();
-    let cli_args = CliArgs::from_args();
+    let cli_args = CliArgs::parse();
     log::debug!("cli_args = {:?}", cli_args);
 
     let api = Api::new(cli_args.telegram_bot_token);

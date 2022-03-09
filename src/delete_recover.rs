@@ -23,11 +23,9 @@ use tokio::{
     },
 };
 
-use structopt::{
-    clap::{
-        AppSettings,
-    },
-    StructOpt,
+use clap::{
+    Parser,
+    AppSettings,
 };
 
 use telegram_bot::{
@@ -56,28 +54,27 @@ pub const DEFAULT_FORWARD_GROUP_ID_STR: &'static str = "-756453207"; // beercan 
 pub const DEFAULT_WINDOW_SIZE_STR: &'static str = "32";
 pub const DEFAULT_CHECK_TIMEOUT_S_STR: &'static str = "60";
 
-#[derive(Clone, Debug, StructOpt)]
-#[structopt(setting = AppSettings::DeriveDisplayOrder)]
-#[structopt(setting = AppSettings::AllowLeadingHyphen)]
+#[derive(Clone, Debug, Parser)]
+#[clap(setting = AppSettings::DeriveDisplayOrder)]
 pub struct CliArgs {
     /// user id to remind about vaccination
-    #[structopt(long = "delete-recover-user-id", default_value = DEFAULT_USER_ID_STR)]
+    #[clap(long = "delete-recover-user-id", default_value = DEFAULT_USER_ID_STR, allow_hyphen_values = true)]
     delete_recover_user_id: Integer,
 
     /// group id to use
-    #[structopt(long = "delete-recover-group-id", default_value = DEFAULT_GROUP_ID_STR)]
+    #[clap(long = "delete-recover-group-id", default_value = DEFAULT_GROUP_ID_STR, allow_hyphen_values = true)]
     delete_recover_group_id: Integer,
 
     /// group id to forward messages to (delete monitor)
-    #[structopt(long = "delete-recover-forward-group-id", default_value = DEFAULT_FORWARD_GROUP_ID_STR)]
+    #[clap(long = "delete-recover-forward-group-id", default_value = DEFAULT_FORWARD_GROUP_ID_STR, allow_hyphen_values = true)]
     delete_recover_forward_group_id: Integer,
 
     /// messages window size to monitor
-    #[structopt(long = "delete-recover-window-size", default_value = DEFAULT_WINDOW_SIZE_STR)]
+    #[clap(long = "delete-recover-window-size", default_value = DEFAULT_WINDOW_SIZE_STR)]
     delete_recover_window_size: usize,
 
     /// check timeout before trying to forward messages (in seconds)
-    #[structopt(long = "delete-recover-check-timeout-s", default_value = DEFAULT_CHECK_TIMEOUT_S_STR)]
+    #[clap(long = "delete-recover-check-timeout-s", default_value = DEFAULT_CHECK_TIMEOUT_S_STR)]
     delete_recover_check_timeout_s: u64,
 }
 

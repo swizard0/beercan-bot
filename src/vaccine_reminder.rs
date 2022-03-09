@@ -1,9 +1,7 @@
 
-use structopt::{
-    clap::{
-        AppSettings,
-    },
-    StructOpt,
+use clap::{
+    Parser,
+    AppSettings,
 };
 
 use rand::Rng;
@@ -28,16 +26,15 @@ use telegram_bot::{
 pub const DEFAULT_USER_ID_STR: &'static str = "337229462"; // Parviz Sadesi
 pub const DEFAULT_GROUP_ID_STR: &'static str = "-222927743"; // Beercan
 
-#[derive(Clone, Debug, StructOpt)]
-#[structopt(setting = AppSettings::DeriveDisplayOrder)]
-#[structopt(setting = AppSettings::AllowLeadingHyphen)]
+#[derive(Clone, Debug, Parser)]
+#[clap(setting = AppSettings::DeriveDisplayOrder)]
 pub struct CliArgs {
     /// user id to remind about vaccination
-    #[structopt(long = "vaccine-reminder-user-id", default_value = DEFAULT_USER_ID_STR)]
+    #[clap(long = "vaccine-reminder-user-id", default_value = DEFAULT_USER_ID_STR, allow_hyphen_values = true)]
     vaccine_reminder_user_id: Integer,
 
     /// group id to use
-    #[structopt(long = "vaccine-reminder-group-id", default_value = DEFAULT_GROUP_ID_STR)]
+    #[clap(long = "vaccine-reminder-group-id", default_value = DEFAULT_GROUP_ID_STR, allow_hyphen_values = true)]
     vaccine_reminder_group_id: Integer,
 }
 
