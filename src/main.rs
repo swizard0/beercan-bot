@@ -15,6 +15,7 @@ use telegram_bot::{
 
 mod vaccine_reminder;
 mod delete_recover;
+mod good_morning_darya;
 
 #[derive(Clone, Debug, Parser)]
 #[clap(setting = AppSettings::DeriveDisplayOrder)]
@@ -28,6 +29,9 @@ struct CliArgs {
 
     #[clap(flatten)]
     delete_recover: delete_recover::CliArgs,
+
+    #[clap(flatten)]
+    good_morning_darya: good_morning_darya::CliArgs,
 }
 
 #[derive(Debug)]
@@ -37,6 +41,7 @@ enum Error {
     VaccineReminderProcess(vaccine_reminder::Error),
     DeleteRecoverCreate(delete_recover::Error),
     DeleteRecoverProcess(delete_recover::Error),
+    GoodMorningDaryaCreate(good_morning_darya::Error),
 }
 
 #[tokio::main]
@@ -51,6 +56,8 @@ async fn main() -> Result<(), Error> {
         .map_err(Error::VaccineReminderCreate)?;
     let mut delete_recover = delete_recover::DeleteRecover::new(&cli_args.delete_recover)
         .map_err(Error::DeleteRecoverCreate)?;
+    let mut _good_morning_darya = good_morning_darya::GoodMorningDarya::new(&cli_args.good_morning_darya)
+        .map_err(Error::GoodMorningDaryaCreate)?;
 
     let mut stream = api.stream();
     while let Some(update) = stream.next().await {
