@@ -194,6 +194,19 @@ mod tests {
     }
 
     #[test]
+    fn nearest_reminder_date_now() {
+        assert_eq!(
+            nearest_reminder_datetime_by(
+                Local.ymd(2022, 3, 9)
+                    .and_hms(17, 0, 0),
+                NaiveTime::from_hms(17, 0, 0),
+            ).unwrap(),
+            Local.ymd(2022, 3, 10)
+                .and_hms(17, 0, 0),
+        );
+    }
+
+    #[test]
     fn next_timeout_1000() {
         let datetime_now = Local.ymd(2022, 3, 9)
             .and_hms(16, 59, 59);
