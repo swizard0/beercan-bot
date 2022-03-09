@@ -1,5 +1,11 @@
 #![forbid(unsafe_code)]
 
+use std::{
+    sync::{
+        Arc,
+    },
+};
+
 use futures::{
     StreamExt,
 };
@@ -50,13 +56,13 @@ async fn main() -> Result<(), Error> {
     let cli_args = CliArgs::parse();
     log::debug!("cli_args = {:?}", cli_args);
 
-    let api = Api::new(cli_args.telegram_bot_token);
+    let api = Arc::new(Api::new(cli_args.telegram_bot_token));
 
     let mut vaccine_reminder = vaccine_reminder::VaccineReminder::new(&cli_args.vaccine_reminder)
         .map_err(Error::VaccineReminderCreate)?;
     let mut delete_recover = delete_recover::DeleteRecover::new(&cli_args.delete_recover)
         .map_err(Error::DeleteRecoverCreate)?;
-    let mut _good_morning_darya = good_morning_darya::GoodMorningDarya::new(&cli_args.good_morning_darya)
+    let mut _good_morning_darya = good_morning_darya::GoodMorningDarya::new(api.clone(), &cli_args.good_morning_darya)
         .map_err(Error::GoodMorningDaryaCreate)?;
 
     let mut stream = api.stream();
